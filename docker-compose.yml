@@ -1,0 +1,48 @@
+# TODO: Change ports exposition here and in dockerfiles when adding to the project
+services:
+  ssh_telnet_honeypot:
+    build: ./ssh-telnet
+    ports:
+      - "2223:2223"
+      - "2222:2222"
+    networks:
+      - honeypot_net
+
+  mqtt_honeypot:
+    build: ./mqtt
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    networks:
+      - honeypot_net
+    volumes:
+      - ./mqtt/config:/mosquitto/config:rw
+      - ./mqtt/data:/mosquitto/data:rw
+      - ./mqtt/log:/mosquitto/log:rw
+    restart: unless-stopped
+
+#  modbus_honeypot:
+#    build: ./modbus
+#    ports:
+#      - "502:502"
+#    networks:
+#      - honeypot_net
+#
+#  coap_honeypot:
+#    build: ./coap
+#    ports:
+#      - "5683:5683/udp"
+#    networks:
+#      - honeypot_net
+#
+#  logger:
+#    build: ./logger
+#    volumes:
+#      - ./logs:/logs
+#    networks:
+#      - honeypot_net
+
+networks:
+  honeypot_net:
+    driver: bridge
+

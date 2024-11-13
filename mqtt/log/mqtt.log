@@ -1,0 +1,70 @@
+1731407916: mosquitto version 2.0.20 starting
+1731407916: Config loaded from /mosquitto/config/mosquitto.conf.
+1731407916: Starting in local only mode. Connections will only be possible from clients running on this machine.
+1731407916: Create a configuration file which defines a listener to allow remote access.
+1731407916: For more details see https://mosquitto.org/documentation/authentication-methods/
+1731407916: Opening ipv4 listen socket on port 1883.
+1731407916: Opening ipv6 listen socket on port 1883.
+1731407916: Error: Address not available
+1731407916: mosquitto version 2.0.20 running
+1731415689: mosquitto version 2.0.20 terminating
+1731415805: mosquitto version 2.0.20 starting
+1731415805: Config loaded from /mosquitto/config/mosquitto.conf.
+1731415805: Starting in local only mode. Connections will only be possible from clients running on this machine.
+1731415805: Create a configuration file which defines a listener to allow remote access.
+1731415805: For more details see https://mosquitto.org/documentation/authentication-methods/
+1731415805: Opening ipv4 listen socket on port 1883.
+1731415805: Opening ipv6 listen socket on port 1883.
+1731415805: Error: Address not available
+1731415805: mosquitto version 2.0.20 running
+1731415847: mosquitto version 2.0.20 terminating
+1731415894: mosquitto version 2.0.20 starting
+1731415894: Config loaded from /mosquitto/config/mosquitto.conf.
+1731415894: Starting in local only mode. Connections will only be possible from clients running on this machine.
+1731415894: Create a configuration file which defines a listener to allow remote access.
+1731415894: For more details see https://mosquitto.org/documentation/authentication-methods/
+1731415894: Opening ipv4 listen socket on port 1883.
+1731415894: Opening ipv6 listen socket on port 1883.
+1731415894: Error: Address not available
+1731415894: mosquitto version 2.0.20 running
+1731417828: mosquitto version 2.0.20 terminating
+1731420123: mosquitto version 2.0.20 starting
+1731420123: Config loaded from /mosquitto/config/mosquitto.conf.
+1731420123: Starting in local only mode. Connections will only be possible from clients running on this machine.
+1731420123: Create a configuration file which defines a listener to allow remote access.
+1731420123: For more details see https://mosquitto.org/documentation/authentication-methods/
+1731420123: Opening ipv4 listen socket on port 1883.
+1731420123: Opening ipv6 listen socket on port 1883.
+1731420123: Error: Address not available
+1731420123: mosquitto version 2.0.20 running
+1731420138: mosquitto version 2.0.20 terminating
+1731420169: mosquitto version 2.0.20 starting
+1731420169: Config loaded from /mosquitto/config/mosquitto.conf.
+1731420169: Starting in local only mode. Connections will only be possible from clients running on this machine.
+1731420169: Create a configuration file which defines a listener to allow remote access.
+1731420169: For more details see https://mosquitto.org/documentation/authentication-methods/
+1731420169: Opening ipv4 listen socket on port 1883.
+1731420169: Opening ipv6 listen socket on port 1883.
+1731420169: Error: Address not available
+1731420169: mosquitto version 2.0.20 running
+1731420242: mosquitto version 2.0.20 terminating
+1731420244: mosquitto version 2.0.20 starting
+1731420244: Config loaded from /mosquitto/config/mosquitto.conf.
+1731420244: Starting in local only mode. Connections will only be possible from clients running on this machine.
+1731420244: Create a configuration file which defines a listener to allow remote access.
+1731420244: For more details see https://mosquitto.org/documentation/authentication-methods/
+1731420244: Opening ipv4 listen socket on port 1883.
+1731420244: Opening ipv6 listen socket on port 1883.
+1731420244: Error: Address not available
+1731420244: mosquitto version 2.0.20 running
+1731420316: mosquitto version 2.0.20 terminating
+1731420331: mosquitto version 2.0.20 starting
+1731420331: Config loaded from /mosquitto/config/mosquitto.conf.
+1731420331: Starting in local only mode. Connections will only be possible from clients running on this machine.
+1731420331: Create a configuration file which defines a listener to allow remote access.
+1731420331: For more details see https://mosquitto.org/documentation/authentication-methods/
+1731420331: Opening ipv4 listen socket on port 1883.
+1731420331: Opening ipv6 listen socket on port 1883.
+1731420331: Error: Address not available
+1731420331: mosquitto version 2.0.20 running
+1731420954: mosquitto version 2.0.20 terminating
