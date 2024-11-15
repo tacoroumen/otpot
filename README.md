@@ -12,8 +12,8 @@ Here i a list of the services:
 | SSH  | ✅ |
 | Telnet | ✅ | 
 | MQTT | ✅ | 
-| CoAp | ❌ | 
-| Modbus | ❌ | 
+| CoAp | ✅ | 
+| Modbus | ✅ | 
 | LogSystem | ⏳ | 
 
 ## How to use it 

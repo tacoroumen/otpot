@@ -21,26 +21,26 @@ services:
       - ./mqtt/log:/mosquitto/log:rw
     restart: unless-stopped
 
-#  modbus_honeypot:
-#    build: ./modbus
-#    ports:
-#      - "502:502"
-#    networks:
-#      - honeypot_net
-#
-#  coap_honeypot:
-#    build: ./coap
-#    ports:
-#      - "5683:5683/udp"
-#    networks:
-#      - honeypot_net
-#
-#  logger:
-#    build: ./logger
-#    volumes:
-#      - ./logs:/logs
-#    networks:
-#      - honeypot_net
+  modbus_honeypot:
+    build: ./modbus
+    ports:
+      - "502:502"
+    networks:
+      - honeypot_net
+
+  coap_honeypot:
+    build: ./coap
+    ports:
+      - "5683:5683/udp"
+    networks:
+      - honeypot_net
+
+  logger:
+    build: ./logger
+    volumes:
+      - ./logs:/logs
+    networks:
+      - honeypot_net
 
 networks:
   honeypot_net:
