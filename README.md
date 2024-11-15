@@ -18,7 +18,8 @@ Here i a list of the services:
 
 ## How to use it 
 
-....
+You can run the HoneyPot just by starting the docker compose using: `docker-compose up` while being in the otpot root directory.
+You can check the containers status using `docker-compose ps`
 
 ## Notes
 
