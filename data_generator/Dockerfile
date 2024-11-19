@@ -9,10 +9,10 @@ WORKDIR /go/src/app
 COPY . .
 
 # Build the Go application
-RUN go build -o coap-server .
+RUN go build -o data_generator .
 
 # Expose port 502 to the outside world
-EXPOSE 5683/udp
+EXPOSE 80
 
 # Command to run the executable
-CMD ["./coap-server"]
+CMD ["./data_generator"]
