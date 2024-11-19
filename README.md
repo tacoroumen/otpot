@@ -25,6 +25,28 @@ It will ensure that the files are cloned with the right permission.\
 After that you can download the repository using `git clone https://github.com/gabriel-lepinay/otpot.git`
 
 ## How to use it 
+You need to create an **``config.json``** file in the **[data_generator](./data_generator)** folder the structure of the json should look like this.
 
-You can run the HoneyPot just by starting the docker compose using: `docker-compose up` while being in the Otpot root directory.
-You can check the containers's status using `docker-compose ps`
+```
+{
+  "web": {
+    "port": 80
+  },
+  "mqtt": {
+    "address": "localhost",
+    "port": 1883
+  },
+  "coap": {
+    "address": "localhost",
+    "port": 5683
+  },
+  "modbus": {
+    "address": "localhost",
+    "port": 502
+  }
+}
+```
+Where the web sets the variables for the gui and the mqtt, coap and modbus set the connection values for the servers.
+
+You can run the HoneyPot just by starting the docker compose using: **`docker-compose up`** while being in the Otpot root directory.
+You can check the containers's status using **`docker-compose ps`**

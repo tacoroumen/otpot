@@ -24,7 +24,7 @@ services:
   modbus_honeypot:
     build: ./modbus
     ports:
-      - "502:502"
+      - "502:502/tcp"
     networks:
       - honeypot_net
 
@@ -32,6 +32,13 @@ services:
     build: ./coap
     ports:
       - "5683:5683/udp"
+    networks:
+      - honeypot_net
+
+  data_generator:
+    build: ./data_generator
+    ports:
+      - "80:80"
     networks:
       - honeypot_net
 
