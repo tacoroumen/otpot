@@ -1,0 +1,17 @@
+{
+  "web": {
+    "port": 80
+  },
+  "mqtt": {
+    "address": "mqqt.local",
+    "port": 1883
+  },
+  "coap": {
+    "address": "coap.local",
+    "port": 5683
+  },
+  "modbus": {
+    "address": "modbus.local",
+    "port": 502
+  }
+}

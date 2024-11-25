@@ -25,7 +25,7 @@ It will ensure that the files are cloned with the right permission.\
 After that you can download the repository using `git clone https://github.com/gabriel-lepinay/otpot.git`
 
 ## How to use it 
-You need to create an **``config.json``** file in the **[data_generator](./data_generator)** folder the structure of the json should look like this.
+If you need more customization for the data generator you can change the **``config.json``**  file in the **[data_generator](./data_generator)** folder, the structure of the json should look like this.
 
 ```
 {
@@ -33,15 +33,15 @@ You need to create an **``config.json``** file in the **[data_generator](./data_
     "port": 80
   },
   "mqtt": {
-    "address": "localhost",
+    "address": "mqqt.local",
     "port": 1883
   },
   "coap": {
-    "address": "localhost",
+    "address": "coap.local",
     "port": 5683
   },
   "modbus": {
-    "address": "localhost",
+    "address": "modbus.local",
     "port": 502
   }
 }
