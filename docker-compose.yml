@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   ssh_telnet_honeypot:
     build: ./ssh-telnet
@@ -112,3 +111,7 @@ networks:
     ipam:
       config:
         - subnet: 10.10.0.0/24
+
+volumes:
+  esdata:
+    driver: local
