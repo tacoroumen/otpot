@@ -3,7 +3,9 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"log"
+	"os"
 	"time"
 
 	coap "github.com/plgd-dev/go-coap/v3"
@@ -48,6 +50,27 @@ func periodicTransmitter(cc mux.Conn, token []byte) {
 }
 
 func main() {
+	// Create a logs directory if it doesn't exist
+	err := os.MkdirAll("/logs", 0755)
+	if err != nil {
+		fmt.Printf("Error creating logs directory: %v\n", err)
+		return
+	}
+
+	// Open the log file
+	logFile, err := os.OpenFile("/logs/coap.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Printf("Error opening log file: %v\n", err)
+		return
+	}
+	defer logFile.Close()
+
+	// Set up multi-writer to log to both the terminal and the file
+	multiWriter := io.MultiWriter(os.Stdout, logFile)
+	log.SetOutput(multiWriter)
+
+	log.Print("CoAP server starting on port 5683")
+
 	log.Fatal(coap.ListenAndServe("udp", "0.0.0.0:5683",
 		mux.HandlerFunc(func(w mux.ResponseWriter, r *mux.Message) {
 			log.Printf("Got message path=%v: %+v from %v", getPath(r.Options()), r, w.Conn().RemoteAddr())
