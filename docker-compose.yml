@@ -66,9 +66,37 @@ services:
         aliases:
           - logger.local
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+    environment:
+      - discovery.type=single-node
+      - cluster.name=honeypot-cluster
+      - "ES_JAVA_OPTS=-Xmx2g -Xms2g"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    networks:
+      - honeypot_net
+    ports:
+      - "9200:9200"
+    restart: unless-stopped
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.10.0
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    networks:
+      - honeypot_net
+    restart: unless-stopped
+
 networks:
   honeypot_net:
     driver: bridge
     ipam:
       config:
         - subnet: 10.10.0.0/24
+
+volumes:
+  esdata:
+    driver: local
