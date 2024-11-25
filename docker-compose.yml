@@ -85,7 +85,8 @@ services:
     volumes:
       - esdata:/usr/share/elasticsearch/data
     networks:
-      - honeypot_net
+      honeypot_net:
+        ipv4_address: 10.10.0.70
     ports:
       - "9200:9200"
     restart: unless-stopped
@@ -97,7 +98,8 @@ services:
     ports:
       - "5601:5601"
     networks:
-      - honeypot_net
+      honeypot_net:
+        ipv4_address: 10.10.0.80
     restart: unless-stopped
 
 networks:
