@@ -106,7 +106,3 @@ networks:
     ipam:
       config:
         - subnet: 10.10.0.0/24
-
-volumes:
-  esdata:
-    driver: local
