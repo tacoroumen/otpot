@@ -4,6 +4,19 @@ filebeat.inputs:
     paths:
       - /logs/*.log
 
-output.elasticsearch:
-  hosts: ["http://elasticsearch:9200"]
+processors:
+  - add_host_metadata: ~
+  - add_cloud_metadata: ~
 
+output.elasticsearch:
+  hosts: ["http://elasticsearch:9200"]  # TODO: Replace with Elasticsearch endpoint
+  index: "honeypot-logs-%{+yyyy.MM.dd}"
+
+logging:
+  level: info
+  to_files: true
+  files:
+    path: /filebeat/logs
+    name: filebeat
+    keepfiles: 7
+    permissions: 0644
