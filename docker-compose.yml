@@ -86,6 +86,8 @@ services:
     networks:
       honeypot_net:
         ipv4_address: 10.10.0.70
+        aliases:
+          - elasticsearch.local
     ports:
       - "9200:9200"
     restart: unless-stopped
@@ -99,6 +101,8 @@ services:
     networks:
       honeypot_net:
         ipv4_address: 10.10.0.80
+        aliases:
+          - kibana.local
     restart: unless-stopped
 
 networks:
@@ -107,7 +111,3 @@ networks:
     ipam:
       config:
         - subnet: 10.10.0.0/24
-
-volumes:
-  esdata:
-    driver: local
