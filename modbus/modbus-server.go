@@ -2,18 +2,39 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net"
+	"os"
 )
 
 func main() {
+	// Create a logs directory if it doesn't exist
+	err := os.MkdirAll("/logs", 0755)
+	if err != nil {
+		fmt.Printf("Error creating logs directory: %v\n", err)
+		return
+	}
+
+	// Open the log file
+	logFile, err := os.OpenFile("/logs/modbus.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Printf("Error opening log file: %v\n", err)
+		return
+	}
+	defer logFile.Close()
+
+	// Set up multi-writer to log to both the terminal and the file
+	multiWriter := io.MultiWriter(os.Stdout, logFile)
+	log.SetOutput(multiWriter)
+
 	// Create a TCP listener
 	listener, err := net.Listen("tcp", "0.0.0.0:502")
 	if err != nil {
 		log.Fatalf("Error starting TCP server: %v", err)
 	}
 	defer listener.Close()
-	fmt.Println("Modbus server listening on port 502")
+	log.Println("Modbus server listening on port 502")
 
 	for {
 		conn, err := listener.Accept()
@@ -41,7 +62,7 @@ func handleConnection(conn net.Conn) {
 				break
 			}
 		}
-		fmt.Printf("Received data: %x\n", data[:n])
+		log.Printf("Received data: %x\n", data[:n])
 
 		// Process the received data
 		response := processData(data[:n])

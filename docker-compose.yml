@@ -1,3 +1,4 @@
+version: "3.8"
 services:
   ssh_telnet_honeypot:
     build: ./ssh-telnet
@@ -9,6 +10,8 @@ services:
         ipv4_address: 10.10.0.10
         aliases:
           - ssh.local
+    volumes:
+      - ./logs:/logs
 
   mqtt_honeypot:
     build: ./mqtt
@@ -24,6 +27,7 @@ services:
       - ./mqtt/config:/mosquitto/config:rw
       - ./mqtt/data:/mosquitto/data:rw
       - ./mqtt/log:/mosquitto/log:rw
+      - ./logs:/logs
     restart: unless-stopped
 
   modbus_honeypot:
@@ -35,6 +39,8 @@ services:
         ipv4_address: 10.10.0.30
         aliases:
           - modbus.local
+    volumes:
+      - ./logs:/logs
 
   coap_honeypot:
     build: ./coap
@@ -45,6 +51,8 @@ services:
         ipv4_address: 10.10.0.40
         aliases:
           - coap.local
+    volumes:
+      - ./logs:/logs
 
   data_generator:
     build: ./data_generator
@@ -55,6 +63,8 @@ services:
         ipv4_address: 10.10.0.50
         aliases:
           - data_generator.local
+    volumes:
+      - ./logs:/logs
 
   logger:
     build: ./logger
