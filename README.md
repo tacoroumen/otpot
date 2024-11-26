@@ -34,7 +34,9 @@ If you need more customization for the data generator you can change the **``con
   },
   "mqtt": {
     "address": "mqqt.local",
-    "port": 1883
+    "port": 1883,
+    "username": "user",
+    "password": "password"
   },
   "coap": {
     "address": "coap.local",
@@ -45,8 +47,12 @@ If you need more customization for the data generator you can change the **``con
     "port": 502
   }
 }
+
 ```
 Where the web sets the variables for the gui and the mqtt, coap and modbus set the connection values for the servers.
+
+Also for mqtt make sure to set an password in the [/mqtt/config/pwfile](./mqtt/config/)
+the formate of the **pwfile** should be user:password, make sure you set this username and password in the data_generator config file as stated above.
 
 You can run the HoneyPot just by starting the docker compose using: **`docker-compose up`** while being in the Otpot root directory.
 You can check the containers's status using **`docker-compose ps`**

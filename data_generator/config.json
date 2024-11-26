@@ -4,7 +4,9 @@
   },
   "mqtt": {
     "address": "mqqt.local",
-    "port": 1883
+    "port": 1883,
+    "username": "user",
+    "password": "password"
   },
   "coap": {
     "address": "coap.local",

@@ -32,6 +32,8 @@ type Config struct {
 	MQTT struct {
 		Address string `json:"address"`
 		Port    int    `json:"port"`
+		Username string `json:"username"`
+		Password string `json:"password"`
 	} `json:"mqtt"`
 	CoAP struct {
 		Address string `json:"address"`
@@ -221,6 +223,8 @@ func generateData(w http.ResponseWriter, r *http.Request) {
 func generateMQTTData() string {
 	broker := fmt.Sprintf("tcp://%s:%d", config.MQTT.Address, config.MQTT.Port)
 	opts := mqtt.NewClientOptions().AddBroker(broker)
+	opts.SetUsername(config.MQTT.Username)
+	opts.SetPassword(config.MQTT.Password)
 	opts.SetClientID("go_mqtt_client")
 
 	client := mqtt.NewClient(opts)
