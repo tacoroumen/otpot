@@ -51,7 +51,7 @@ func periodicTransmitter(cc mux.Conn, token []byte) {
 
 func main() {
 	// Create a logs directory if it doesn't exist
-	err := os.MkdirAll("/logs", 0755)
+	err := os.MkdirAll("/logs", 0777)
 	if err != nil {
 		fmt.Printf("Error creating logs directory: %v\n", err)
 		return

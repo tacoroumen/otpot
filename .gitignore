@@ -1,1 +1,6 @@
+# Ignore the entire logs directory
 /logs
+
+# Ignore specific directories under mqtt
+/mqtt/data
+/mqtt/log

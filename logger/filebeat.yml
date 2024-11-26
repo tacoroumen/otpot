@@ -9,14 +9,21 @@ processors:
   - add_cloud_metadata: ~
 
 output.elasticsearch:
-  hosts: ["http://elasticsearch:9200"]  # TODO: Replace with Elasticsearch endpoint
+  hosts: ["http://elasticsearch.local:9200"]  # TODO: Replace with Elasticsearch endpoint
   index: "honeypot-logs-%{+yyyy.MM.dd}"
+
+setup.kibana:
+  host: "http://kibana.local:5601" 
+
+setup.template.name: "my-honeypot-template"  # Custom template name
+setup.template.pattern: "my-honeypot-*"      # Custom index pattern
+
 
 logging:
   level: info
   to_files: true
   files:
-    path: /filebeat/logs
+    path: /logs/filebeat
     name: filebeat
     keepfiles: 7
     permissions: 0644
