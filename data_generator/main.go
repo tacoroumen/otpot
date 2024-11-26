@@ -30,8 +30,8 @@ type Config struct {
 		Port int `json:"port"`
 	} `json:"web"`
 	MQTT struct {
-		Address  string `json:"address"`
-		Port     int    `json:"port"`
+		Address string `json:"address"`
+		Port    int    `json:"port"`
 		Username string `json:"username"`
 		Password string `json:"password"`
 	} `json:"mqtt"`
@@ -222,8 +222,6 @@ func generateData(w http.ResponseWriter, r *http.Request) {
 // generateMQTTData simulates the data generation and sending to an MQTT broker
 func generateMQTTData() string {
 	broker := fmt.Sprintf("tcp://%s:%d", config.MQTT.Address, config.MQTT.Port)
-	log.Printf("Connecting to MQTT broker at %s", broker)
-
 	opts := mqtt.NewClientOptions().AddBroker(broker)
 	opts.SetUsername(config.MQTT.Username)
 	opts.SetPassword(config.MQTT.Password)
@@ -231,11 +229,9 @@ func generateMQTTData() string {
 
 	client := mqtt.NewClient(opts)
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		log.Printf("Failed to connect to MQTT broker: %v", token.Error())
-		return fmt.Sprintf("Failed to connect to MQTT broker: %v\n", token.Error())
+		return fmt.Sprintf("Failed to connect to MQTT broker on %s:%d: %v\n", config.MQTT.Address, config.MQTT.Port, token.Error())
 	}
 	defer client.Disconnect(250)
-	log.Println("Connected to MQTT broker")
 
 	// Simulate data generation and publishing on each topic
 	for i := 1; i <= rand.Intn(10)+1; i++ { // Randomize the number of devices (1-10)
@@ -244,29 +240,19 @@ func generateMQTTData() string {
 
 		// Create a unique topic based on the device type and device ID
 		topic := fmt.Sprintf("ot/device/%s/%s", deviceType, deviceID)
-		log.Printf("Preparing to publish to topic: %s", topic)
 
 		data := createOTData(deviceID, deviceType)
 
 		payload, err := json.Marshal(data)
 		if err != nil {
-			log.Printf("Failed to marshal data for device %s: %v", deviceID, err)
-			continue
+			return fmt.Sprintf("Failed to generate data for device %s: %v\n", deviceID, err)
 		}
 
-		log.Printf("Publishing message to topic %s: %s", topic, payload)
 		token := client.Publish(topic, 0, false, payload)
 		token.Wait()
-		if token.Error() != nil {
-			log.Printf("Failed to publish to topic %s: %v", topic, token.Error())
-		} else {
-			log.Printf("Successfully published message to topic %s", topic)
-		}
-
 		time.Sleep(500 * time.Millisecond) // Simulate delay between messages
 	}
 
-	log.Println("Completed MQTT data generation and publishing")
 	return "Sending OT MQTT data\n"
 }
 
