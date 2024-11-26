@@ -3,7 +3,7 @@
     "port": 80
   },
   "mqtt": {
-    "address": "mqqt.local",
+    "address": "mqtt.local",
     "port": 1883,
     "username": "user",
     "password": "password"
