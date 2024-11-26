@@ -1,1 +1,10 @@
+# Ignore the specific config file
+/data_generator/config.json
+
+# Ignore the entire logs directory
 /logs
+
+# Ignore specific directories under mqtt
+/mqtt/data
+/mqtt/log
+/mqtt/config/pwfile
