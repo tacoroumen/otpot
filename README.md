@@ -25,6 +25,13 @@ It will ensure that the files are cloned with the right permission.\
 After that you can download the repository using `git clone https://github.com/gabriel-lepinay/otpot.git`
 
 ## How to use it 
+
+#### Attack map config
+To get the API key for threat level calculation please register an account here abuseipdb.com then put the key in [/attack_map/key.txt](./attack_map/key.txt)
+
+---
+
+#### Data generator config
 If you need more customization for the data generator you can change the **``config.json``**  file in the **[data_generator](./data_generator)** folder, the structure of the json should look like this.
 
 ```
@@ -49,10 +56,18 @@ If you need more customization for the data generator you can change the **``con
 }
 
 ```
+
 Where the web sets the variables for the gui and the mqtt, coap and modbus set the connection values for the servers.
 
-Also for mqtt make sure to set an password in the [/mqtt/config/pwfile](./mqtt/config/)
+---
+
+#### Mqtt config
+
+For mqtt make sure to set an password in the [/mqtt/config/pwfile](./mqtt/config/)
 the formate of the **pwfile** should be user:password, make sure you set this username and password in the data_generator config file as stated above.
+
+---
+#### Starting the Honeypot
 
 You can run the HoneyPot just by starting the docker compose using: **`docker-compose up`** while being in the Otpot root directory.
 You can check the containers's status using **`docker-compose ps`**
