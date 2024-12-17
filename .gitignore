@@ -4,3 +4,5 @@
 # Ignore specific directories under mqtt
 /mqtt/data
 /mqtt/log
+
+/Attack_map/key.txt

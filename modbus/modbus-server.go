@@ -42,12 +42,14 @@ func main() {
 			log.Printf("Error accepting connection: %v", err)
 			continue
 		}
+		log.Printf("Connection established from %s", conn.RemoteAddr().String())
 		go handleConnection(conn)
 	}
 }
 
 func handleConnection(conn net.Conn) {
 	defer conn.Close()
+	originIP := conn.RemoteAddr().String()
 
 	for {
 		data := make([]byte, 1024)
@@ -55,14 +57,14 @@ func handleConnection(conn net.Conn) {
 		if err != nil {
 			// If the error is EOF, the connection was closed by the client, which is expected.
 			if err.Error() == "EOF" {
-				log.Println("Client disconnected.")
+				log.Printf("Client %s disconnected.", originIP)
 				break
 			} else {
-				log.Printf("Error reading data: %v", err)
+				log.Printf("Error reading data from %s: %v", originIP, err)
 				break
 			}
 		}
-		log.Printf("Received data: %x\n", data[:n])
+		log.Printf("Received data from %s: %x\n", originIP, data[:n])
 
 		// Process the received data
 		response := processData(data[:n])
@@ -70,7 +72,7 @@ func handleConnection(conn net.Conn) {
 		// Echo the processed data back to the client
 		_, err = conn.Write(response)
 		if err != nil {
-			log.Printf("Error writing data: %v", err)
+			log.Printf("Error writing data to %s: %v", originIP, err)
 			return
 		}
 	}
