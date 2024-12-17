@@ -254,10 +254,10 @@ func threatsHandler(w http.ResponseWriter, r *http.Request) {
 func reloadHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse log files to extract IPs
 	logFiles := []string{
-		"../logs/coap.log",
-		"../logs/mqtt.log",
-		"../logs/modbus.log",
-		"../logs/cowrie.log",
+		"/logs/coap.log",
+		"/logs/mqtt.log",
+		"/logs/modbus.log",
+		"/logs/cowrie.log",
 		"test_ips.txt", // Add the test IPs file
 	}
 	if err := parseLogs(logFiles); err != nil {
