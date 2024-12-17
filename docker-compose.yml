@@ -105,6 +105,18 @@ services:
           - kibana.local
     restart: unless-stopped
 
+  attack_map:
+    build: ./attack_map
+    ports:
+      - "8080:8080"
+    networks:
+      honeypot_net:
+        ipv4_address: 10.10.0.90
+        aliases:
+          - attack_map.local
+    volumes:
+      - ./logs:/logs
+
 networks:
   honeypot_net:
     driver: bridge
