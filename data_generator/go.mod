@@ -1,6 +1,6 @@
 module data_generator
 
-go 1.23.0
+go 1.22.1
 
 require (
 	github.com/eclipse/paho.mqtt.golang v1.5.0
