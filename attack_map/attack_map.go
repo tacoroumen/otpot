@@ -258,7 +258,7 @@ func reloadHandler(w http.ResponseWriter, r *http.Request) {
 		"/logs/mqtt.log",
 		"/logs/modbus.log",
 		"/logs/cowrie.log",
-		"test_ips.txt", // Add the test IPs file
+		//"test_ips.txt", // Add the test IPs file
 	}
 	if err := parseLogs(logFiles); err != nil {
 		log.Fatalf("Error parsing log files: %v", err)

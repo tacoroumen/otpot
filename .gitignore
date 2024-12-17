@@ -5,4 +5,5 @@
 /mqtt/data
 /mqtt/log
 
-/Attack_map/key.txt
+/attack_map/key.txt
+/attack_map/test_ips.txt
