@@ -44,7 +44,6 @@ var (
 )
 
 // fetchGeoData loads the geolocation data for a specific IP from the external API
-// fetchGeoData loads the geolocation data for a specific IP from the external API
 func fetchGeoData(apiURL string, ip string) error {
 	resp, err := http.Get(apiURL)
 	if err != nil {
@@ -115,7 +114,7 @@ func parseLogs(logFiles []string) error {
 	return nil
 }
 
-// isExcluded checks if the IP is in the range 10.0.0.0/24
+// isExcluded checks if the IP is in the range 10.10.0.0/24
 func isExcluded(ip string) bool {
 	_, cidr, _ := net.ParseCIDR("10.10.0.0/24")
 	parsedIP := net.ParseIP(ip)
@@ -157,7 +156,6 @@ func calculateThreatLevel(ip string, country string, failedAttempts int) int {
 	return threatLevel
 }
 
-// getIPReputation simulates fetching IP reputation
 // getIPReputation simulates fetching IP reputation
 func getIPReputation(ip string) int {
 	// Your AbuseIPDB API key
