@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math"
 	"net"
 	"net/http"
 	"os"
@@ -32,7 +31,7 @@ type CountryData struct {
 	Longitude          float64 `json:"longitude"`
 	Count              int     `json:"count"`                // Count of IPs from this country
 	RequestCount       int     `json:"request_count"`        // Total request count for the country
-	AverageThreatLevel float64 `json:"average_threat_level"` // Average threat level for the country
+	MaxThreatLevel	   int `json:"max_threat_level"` // max threat level for the country
 }
 
 // Global in-memory cache
@@ -298,25 +297,25 @@ func pointsHandler(w http.ResponseWriter, r *http.Request) {
 // countriesHandler serves aggregated country-level data
 func countriesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	// Calculate average threat level for each country
+
+	// Calculate the maximum threat level for each country
 	for country, data := range countryData {
-		// Calculate total threat level for the country
-		totalThreatLevel := 0
+		// Initialize maxThreatLevel for the country
+		maxThreatLevel := 0
 		for _, ip := range ipData {
 			if ip.Country == country {
-				// Include the ThreatLevel in the calculation
-				totalThreatLevel += ip.ThreatLevel
+				// Update maxThreatLevel if the current IP's ThreatLevel is higher
+				if ip.ThreatLevel > maxThreatLevel {
+					maxThreatLevel = ip.ThreatLevel
+				}
 			}
 		}
-		// Calculate the average threat level
-		if data.Count > 0 {
-			data.AverageThreatLevel = float64(totalThreatLevel) / float64(data.Count)
-			data.AverageThreatLevel = math.Round(float64(totalThreatLevel)/float64(data.Count)*100) / 100
-		}
+		// Update the max threat level in the data
+		data.MaxThreatLevel = maxThreatLevel
 		countryData[country] = data
 	}
 
-	// Return the aggregated country-level data with the average threat level
+	// Return the aggregated country-level data with the max threat level
 	json.NewEncoder(w).Encode(countryData)
 }
 
