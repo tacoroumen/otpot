@@ -26,12 +26,12 @@ type APIResponse struct {
 
 // CountryData aggregates data for a country
 type CountryData struct {
-	Country            string  `json:"country"`
-	Latitude           float64 `json:"latitude"`
-	Longitude          float64 `json:"longitude"`
-	Count              int     `json:"count"`                // Count of IPs from this country
-	RequestCount       int     `json:"request_count"`        // Total request count for the country
-	MaxThreatLevel	   int `json:"max_threat_level"` // max threat level for the country
+	Country        	string  `json:"country"`
+	Latitude       	float64 `json:"latitude"`
+	Longitude      	float64 `json:"longitude"`
+	Count          	int     `json:"count"`            // Count of IPs from this country
+	RequestCount   	int     `json:"request_count"`    // Total request count for the country
+	MaxThreatLevel	int     `json:"max_threat_level"` // max threat level for the country
 }
 
 // Global in-memory cache
