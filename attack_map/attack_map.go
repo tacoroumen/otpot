@@ -9,6 +9,7 @@ import (
 	"math"
 	"net"
 	"net/http"
+	"net/smtp"
 	"os"
 	"regexp"
 	"strings"
@@ -44,6 +45,7 @@ var (
 )
 
 // fetchGeoData loads the geolocation data for a specific IP from the external API
+// fetchGeoData loads the geolocation data for a specific IP from the external API
 func fetchGeoData(apiURL string, ip string) error {
 	resp, err := http.Get(apiURL)
 	if err != nil {
@@ -65,10 +67,21 @@ func fetchGeoData(apiURL string, ip string) error {
 	// Set the IP for the response
 	apiResponse.IP = ip
 
+	threatLevelThreshold := 65
+
 	// Calculate threat level
 	failedAttempts := ipCounts[ip] // Use the request count as a proxy for failed login attempts
 	threatLevel := calculateThreatLevel(ip, apiResponse.Country, failedAttempts)
 	apiResponse.ThreatLevel = threatLevel
+	if threatLevel > threatLevelThreshold {
+		subject := fmt.Sprintf("High Threat Alert: %d (%s, %s)", threatLevel, ip, apiResponse.Country)
+		body := fmt.Sprintf("A threat with threat level %d has been detected. This exceeds the maximum allowed threat level of %d. Action is recommended.
+		Threat is coming from IP: %s, with geolocation: %s. This threat has made %d requests ", threatLevel, threatLevelThreshold, ip, apiResponse.Country, apiResponse.RequestCount)
+		err := sendEmail(subject, body)
+		if err != nil {
+			return fmt.Errorf("Error sending email: %v", err)
+		}
+	}
 
 	// Append the single response to ipData
 	ipData = append(ipData, apiResponse)
@@ -114,7 +127,7 @@ func parseLogs(logFiles []string) error {
 	return nil
 }
 
-// isExcluded checks if the IP is in the range 10.10.0.0/24
+// isExcluded checks if the IP is in the range 10.0.0.0/24
 func isExcluded(ip string) bool {
 	_, cidr, _ := net.ParseCIDR("10.10.0.0/24")
 	parsedIP := net.ParseIP(ip)
@@ -156,6 +169,7 @@ func calculateThreatLevel(ip string, country string, failedAttempts int) int {
 	return threatLevel
 }
 
+// getIPReputation simulates fetching IP reputation
 // getIPReputation simulates fetching IP reputation
 func getIPReputation(ip string) int {
 	// Your AbuseIPDB API key
@@ -252,11 +266,11 @@ func threatsHandler(w http.ResponseWriter, r *http.Request) {
 func reloadHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse log files to extract IPs
 	logFiles := []string{
-		"/logs/coap.log",
-		"/logs/mqtt.log",
-		"/logs/modbus.log",
-		"/logs/cowrie.log",
-		//"test_ips.txt", // Add the test IPs file
+		"../logs/coap.log",
+		"../logs/mqtt.log",
+		"../logs/modbus.log",
+		"../logs/cowrie.log",
+		"test_ips.txt", // Add the test IPs file
 	}
 	if err := parseLogs(logFiles); err != nil {
 		log.Fatalf("Error parsing log files: %v", err)
@@ -318,6 +332,30 @@ func countriesHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Return the aggregated country-level data with the average threat level
 	json.NewEncoder(w).Encode(countryData)
+}
+
+func sendEmail(subject, body string) error{
+	// INPUT EMAIL CREDENTIALS !
+	smtpServer := "smtp.example.com"
+	smtpPort := "587"
+	username := "username@email.com"
+	password := "password"
+	recipient := "recipient@email.com"
+
+	// Format for email
+	msg := fmt.Sprintf("Subject: %\r\n\r\n%s", subject, body)
+
+	// Email addresses and auth
+	from := username
+	to := []string{recipient}
+	auth := smtp.PlainAuth("", username, password, smtpServer)
+
+	// Email sending
+	err := smtp.SendMail(smtpServer+":"+smtpPort, auth, from, to, []byte(msg))
+	if err != nil {
+		return fmt.Errorf("failed to send email: %v", err)
+	}
+	return nil
 }
 
 func main() {
