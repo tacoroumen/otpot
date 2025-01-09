@@ -16,6 +16,15 @@ import (
 	"time"
 )
 
+type Config struct {
+	SMTPServer           string `json:"smtpserver"`
+	SMTPPort             int    `json:"smtpport"`
+	Username             string `json:"username"`
+	Password             string `json:"password"`
+	Recipient            string `json:"recipient"`
+	ThreatLevelThreshold int    `json:"threatLevelThreshold"`
+}
+
 // APIResponse represents a single IP geolocation record
 type APIResponse struct {
 	IP           string  `json:"query"`
