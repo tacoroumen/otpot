@@ -44,6 +44,22 @@ var (
 	ipCounts    = map[string]int{}             // Map to store request counts for each IP
 )
 
+func loadConfig(configFile string) (*Config, error) {
+	file, err := os.Open(configFile)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open config file: %v", err)
+	}
+	defer file.Close()
+
+	var config Config
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&config)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse config file: %v", err)
+	}
+	return &config, nil
+}
+
 // fetchGeoData loads the geolocation data for a specific IP from the external API
 // fetchGeoData loads the geolocation data for a specific IP from the external API
 func fetchGeoData(apiURL string, ip string) error {
@@ -334,24 +350,23 @@ func countriesHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(countryData)
 }
 
-func sendEmail(subject, body string) error{
-	// INPUT EMAIL CREDENTIALS !
-	smtpServer := "smtp.example.com"
-	smtpPort := "587"
-	username := "username@email.com"
-	password := "password"
-	recipient := "recipient@email.com"
+func sendEmail(subject, body string) error {
+	// Load configuration
+	config, err := loadConfig("config.json")
+	if err != nil {
+		return fmt.Errorf("error loading config: %v", err)
+	}
 
 	// Format for email
-	msg := fmt.Sprintf("Subject: %\r\n\r\n%s", subject, body)
+	msg := fmt.Sprintf("Subject: %s\r\n\r\n%s", subject, body)
 
 	// Email addresses and auth
-	from := username
-	to := []string{recipient}
-	auth := smtp.PlainAuth("", username, password, smtpServer)
+	from := config.username
+	to := []string{config.recipient}
+	auth := smtp.PlainAuth("", config.username, config.password, config.smtpserver)
 
 	// Email sending
-	err := smtp.SendMail(smtpServer+":"+smtpPort, auth, from, to, []byte(msg))
+	err = smtp.SendMail(fmt.Sprintf("%s:%d", config.smtpserver, config.smtpport), auth, from, to, []byte(msg))
 	if err != nil {
 		return fmt.Errorf("failed to send email: %v", err)
 	}
