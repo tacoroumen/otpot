@@ -8,11 +8,21 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/smtp"
 	"os"
 	"regexp"
 	"strings"
 	"time"
 )
+
+type Config struct {
+	SMTPServer           string `json:"smtpserver"`
+	SMTPPort             int    `json:"smtpport"`
+	Username             string `json:"username"`
+	Password             string `json:"password"`
+	Recipient            string `json:"recipient"`
+	ThreatLevelThreshold int    `json:"threatLevelThreshold"`
+}
 
 // APIResponse represents a single IP geolocation record
 type APIResponse struct {
@@ -42,6 +52,23 @@ var (
 	ipCounts    = map[string]int{}             // Map to store request counts for each IP
 )
 
+func loadConfig(configFile string) (*Config, error) {
+	file, err := os.Open(configFile)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open config file: %v", err)
+	}
+	defer file.Close()
+
+	var config Config
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&config)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse config file: %v", err)
+	}
+	return &config, nil
+}
+
+// fetchGeoData loads the geolocation data for a specific IP from the external API
 // fetchGeoData loads the geolocation data for a specific IP from the external API
 func fetchGeoData(apiURL string, ip string) error {
 	resp, err := http.Get(apiURL)
@@ -64,10 +91,21 @@ func fetchGeoData(apiURL string, ip string) error {
 	// Set the IP for the response
 	apiResponse.IP = ip
 
+	threatLevelThreshold := 65
+
 	// Calculate threat level
 	failedAttempts := ipCounts[ip] // Use the request count as a proxy for failed login attempts
 	threatLevel := calculateThreatLevel(ip, apiResponse.Country, failedAttempts)
 	apiResponse.ThreatLevel = threatLevel
+	if threatLevel > threatLevelThreshold {
+		subject := fmt.Sprintf("High Threat Alert: %d (%s, %s)", threatLevel, ip, apiResponse.Country)
+		body := fmt.Sprintf("A threat with threat level %d has been detected. This exceeds the maximum allowed threat level of %d. Action is recommended.
+		Threat is coming from IP: %s, with geolocation: %s. This threat has made %d requests ", threatLevel, threatLevelThreshold, ip, apiResponse.Country, apiResponse.RequestCount)
+		err := sendEmail(subject, body)
+		if err != nil {
+			return fmt.Errorf("Error sending email: %v", err)
+		}
+	}
 
 	// Append the single response to ipData
 	ipData = append(ipData, apiResponse)
@@ -113,7 +151,7 @@ func parseLogs(logFiles []string) error {
 	return nil
 }
 
-// isExcluded checks if the IP is in the range 10.10.0.0/24
+// isExcluded checks if the IP is in the range 10.0.0.0/24
 func isExcluded(ip string) bool {
 	_, cidr, _ := net.ParseCIDR("10.10.0.0/24")
 	parsedIP := net.ParseIP(ip)
@@ -155,6 +193,7 @@ func calculateThreatLevel(ip string, country string, failedAttempts int) int {
 	return threatLevel
 }
 
+// getIPReputation simulates fetching IP reputation
 // getIPReputation simulates fetching IP reputation
 func getIPReputation(ip string) int {
 	// Your AbuseIPDB API key
@@ -251,11 +290,11 @@ func threatsHandler(w http.ResponseWriter, r *http.Request) {
 func reloadHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse log files to extract IPs
 	logFiles := []string{
-		"/logs/coap.log",
-		"/logs/mqtt.log",
-		"/logs/modbus.log",
-		"/logs/cowrie.log",
-		//"test_ips.txt", // Add the test IPs file
+		"../logs/coap.log",
+		"../logs/mqtt.log",
+		"../logs/modbus.log",
+		"../logs/cowrie.log",
+		"test_ips.txt", // Add the test IPs file
 	}
 	if err := parseLogs(logFiles); err != nil {
 		log.Fatalf("Error parsing log files: %v", err)
@@ -317,6 +356,29 @@ func countriesHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Return the aggregated country-level data with the max threat level
 	json.NewEncoder(w).Encode(countryData)
+}
+
+func sendEmail(subject, body string) error {
+	// Load configuration
+	config, err := loadConfig("config.json")
+	if err != nil {
+		return fmt.Errorf("error loading config: %v", err)
+	}
+
+	// Format for email
+	msg := fmt.Sprintf("Subject: %s\r\n\r\n%s", subject, body)
+
+	// Email addresses and auth
+	from := config.username
+	to := []string{config.recipient}
+	auth := smtp.PlainAuth("", config.username, config.password, config.smtpserver)
+
+	// Email sending
+	err = smtp.SendMail(fmt.Sprintf("%s:%d", config.smtpserver, config.smtpport), auth, from, to, []byte(msg))
+	if err != nil {
+		return fmt.Errorf("failed to send email: %v", err)
+	}
+	return nil
 }
 
 func main() {
