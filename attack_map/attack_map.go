@@ -70,7 +70,6 @@ func loadConfig(configFile string) (*Config, error) {
 }
 
 // fetchGeoData loads the geolocation data for a specific IP from the external API
-// fetchGeoData loads the geolocation data for a specific IP from the external API
 func fetchGeoData(apiURL string, ip string) error {
 	resp, err := http.Get(apiURL)
 	if err != nil {
@@ -89,10 +88,17 @@ func fetchGeoData(apiURL string, ip string) error {
 		return fmt.Errorf("error parsing JSON: %w", err)
 	}
 
+	// Load configuration
+	config, err := loadConfig("config.json")
+	if err != nil {
+		return fmt.Errorf("error loading config: %v", err)
+	}
+
+
 	// Set the IP for the response
 	apiResponse.IP = ip
 
-	threatLevelThreshold := 65
+	threatLevelThreshold := config.ThreatLevelThreshold
 
 	// Calculate threat level
 	failedAttempts := ipCounts[ip] // Use the request count as a proxy for failed login attempts
@@ -100,8 +106,7 @@ func fetchGeoData(apiURL string, ip string) error {
 	apiResponse.ThreatLevel = threatLevel
 	if threatLevel > threatLevelThreshold {
 		subject := fmt.Sprintf("High Threat Alert: %d (%s, %s)", threatLevel, ip, apiResponse.Country)
-		body := fmt.Sprintf("A threat with threat level %d has been detected. This exceeds the maximum allowed threat level of %d. Action is recommended.
-		Threat is coming from IP: %s, with geolocation: %s. This threat has made %d requests ", threatLevel, threatLevelThreshold, ip, apiResponse.Country, apiResponse.RequestCount)
+		body := fmt.Sprintf("A threat with threat level %d has been detected. This exceeds the maximum allowed threat level of %d. Action is recommended. Threat is coming from IP: %s, with geolocation: %s. This threat has made %d requests ", threatLevel, config.ThreatLevelThreshold, ip, apiResponse.Country, apiResponse.RequestCount)
 		err := sendEmail(subject, body)
 		if err != nil {
 			return fmt.Errorf("Error sending email: %v", err)
@@ -194,8 +199,7 @@ func calculateThreatLevel(ip string, country string, failedAttempts int) int {
 	return threatLevel
 }
 
-// getIPReputation simulates fetching IP reputation
-// getIPReputation simulates fetching IP reputation
+// Fixing getIPReputation to handle potential error return
 func getIPReputation(ip string) int {
 	// Your AbuseIPDB API key
 	data, err := os.ReadFile("key.txt")
@@ -370,12 +374,12 @@ func sendEmail(subject, body string) error {
 	msg := fmt.Sprintf("Subject: %s\r\n\r\n%s", subject, body)
 
 	// Email addresses and auth
-	from := config.username
-	to := []string{config.recipient}
-	auth := smtp.PlainAuth("", config.username, config.password, config.smtpserver)
+	from := config.Username
+	to := []string{config.Recipient}
+	auth := smtp.PlainAuth("", config.Username, config.Password, config.SMTPServer)
 
 	// Email sending
-	err = smtp.SendMail(fmt.Sprintf("%s:%d", config.smtpserver, config.smtpport), auth, from, to, []byte(msg))
+	err = smtp.SendMail(fmt.Sprintf("%s:%d", config.SMTPServer, config.SMTPPort), auth, from, to, []byte(msg))
 	if err != nil {
 		return fmt.Errorf("failed to send email: %v", err)
 	}
