@@ -70,30 +70,29 @@ func loadConfig(configFile string) (*Config, error) {
 }
 
 // fetchGeoData loads the geolocation data for a specific IP from the external API
-func fetchGeoData(apiURL string, ip string) error {
+func fetchGeoData(apiURL string, ip string) (string, error) { // Return the country name as a string
 	resp, err := http.Get(apiURL)
 	if err != nil {
-		return fmt.Errorf("error fetching geo data: %w", err)
+		return "", fmt.Errorf("error fetching geo data: %w", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("error reading response body: %w", err)
+		return "", fmt.Errorf("error reading response body: %w", err)
 	}
 
 	// Parse the single response into an APIResponse struct
 	var apiResponse APIResponse
 	if err := json.Unmarshal(body, &apiResponse); err != nil {
-		return fmt.Errorf("error parsing JSON: %w", err)
+		return "", fmt.Errorf("error parsing JSON: %w", err)
 	}
 
 	// Load configuration
 	config, err := loadConfig("config.json")
 	if err != nil {
-		return fmt.Errorf("error loading config: %v", err)
+		return "", fmt.Errorf("error loading config: %v", err)
 	}
-
 
 	// Set the IP for the response
 	apiResponse.IP = ip
@@ -109,7 +108,7 @@ func fetchGeoData(apiURL string, ip string) error {
 		body := fmt.Sprintf("A threat with threat level %d has been detected. This exceeds the maximum allowed threat level of %d. Action is recommended. Threat is coming from IP: %s, with geolocation: %s. This threat has made %d requests ", threatLevel, config.ThreatLevelThreshold, ip, apiResponse.Country, apiResponse.RequestCount)
 		err := sendEmail(subject, body)
 		if err != nil {
-			return fmt.Errorf("Error sending email: %v", err)
+			return "", fmt.Errorf("Error sending email: %v", err)
 		}
 	}
 
@@ -125,7 +124,8 @@ func fetchGeoData(apiURL string, ip string) error {
 	country.RequestCount += ipCounts[ip]
 	countryData[apiResponse.Country] = country
 
-	return nil
+	// Return the country as part of the response
+	return apiResponse.Country, nil
 }
 
 // parseLogs reads .log files, extracts IP addresses, and stores them with timestamps
@@ -305,16 +305,23 @@ func reloadHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("Error parsing log files: %v", err)
 	}
 
-	// Filter IPs from the last month and fetch geolocation data
-	recentIPs := filterIPs()
-	for _, ip := range recentIPs {
-		fmt.Printf("Fetching geo data for IP: %s\n", ip)
-		apiURL := fmt.Sprintf("http://ip-api.com/json/%s", ip)
-		if err := fetchGeoData(apiURL, ip); err != nil {
-			log.Printf("Error fetching geo data for IP %s: %v", ip, err)
-		}
-		//time.Sleep(100 * time.Millisecond) // Sleep for 100ms to avoid rate limiting
+// Filter IPs from the last month and fetch geolocation data
+recentIPs := filterIPs()
+for _, ip := range recentIPs {
+	fmt.Printf("Fetching geo data for IP: %s\n", ip)
+	apiURL := fmt.Sprintf("http://ip-api.com/json/%s", ip)
+
+	// Fetch geo data and capture both error and country
+	country, err := fetchGeoData(apiURL, ip)
+	if err != nil {
+		log.Printf("Error fetching geo data for IP %s: %v", ip, err)
+	} else {
+		// If geo data is fetched successfully, log the country
+		fmt.Printf("Geo data for IP %s fetched successfully. Country: %s\n", ip, country)
 	}
+	// Optional: Add a sleep if you're rate-limiting
+	// time.Sleep(100 * time.Millisecond)
+}
 
 	// After all IPs have been processed, send the response
 	w.WriteHeader(http.StatusOK) // 200 OK status code
@@ -386,6 +393,88 @@ func sendEmail(subject, body string) error {
 	return nil
 }
 
+func reloadDataAndSendEmail() error {
+	// List of log files to parse
+	logFiles := []string{
+		"/logs/coap.log",
+		"/logs/mqtt.log",
+		"/logs/modbus.log",
+		"/logs/cowrie.log",
+	}
+
+	// Parse the log files and extract IPs
+	if err := parseLogs(logFiles); err != nil {
+		return fmt.Errorf("error parsing log files: %v", err)
+	}
+
+	// Filter IPs from the last week
+	recentIPs := filterIPsWeekly()
+	fmt.Println(recentIPs)
+	if len(recentIPs) == 0 {
+		return fmt.Errorf("no recent IPs found to process")
+	}
+
+	var emailBody string
+	for _, ip := range recentIPs {
+		emailBody += fmt.Sprintf("Request made from the following IP: %s\n", ip)
+	
+		// Construct the API URL for geolocation
+		apiURL := fmt.Sprintf("http://ip-api.com/json/%s", ip)
+	
+		// Fetch the geo data for the IP and retrieve the country
+		country, err := fetchGeoData(apiURL, ip)
+		if err != nil {
+			emailBody += fmt.Sprintf("Error fetching geo data for IP %s: %v\n", ip, err)
+		} else {
+			emailBody += fmt.Sprintf("Geo data for IP %s fetched successfully. Country of origin: %s\n", ip, country)
+		}
+	}
+	
+	// Send the email with the constructed email body
+	subject := "Weekly Geo Data Report"
+	err := sendEmail(subject, emailBody)
+	if err != nil {
+		log.Printf("Error sending email: %v", err)
+	}
+
+	// Return success
+	return nil
+}
+
+// filterIPs filters IPs that are from the last week and excludes specific ranges
+func filterIPsWeekly() []string {
+	oneWeekAgo := time.Now().AddDate(0, 0, -7) // Date exactly 7 days ago
+	var recentIPs []string
+
+	// Iterate over all IPs and timestamps in logIPs
+	for ip, timestamp := range logIPs {
+		// Only include IPs that are from the last week and are not excluded
+		if timestamp.After(oneWeekAgo) && !isExcluded(ip) {
+			recentIPs = append(recentIPs, ip)
+		}
+	}
+	return recentIPs
+}
+
+func scheduleWeeklyReload() {
+	// Create a ticker that triggers every minute for demo purposes
+	ticker := time.NewTicker(time.Second * 60)
+
+	// Run the first reload immediately
+	log.Printf("Tried sending an email")
+	go reloadDataAndSendEmail()
+
+	// Periodically call reloadDataAndSendEmail every 7 days
+	for {
+		select {
+		case <-ticker.C:
+			if err := reloadDataAndSendEmail(); err != nil {
+				log.Printf("Error during scheduled data reload: %v", err)
+			}
+		}
+	}
+}
+
 func main() {
 	// Serve API endpoints
 	http.HandleFunc("/points", pointsHandler)
@@ -395,6 +484,8 @@ func main() {
 
 	// Serve static files
 	http.Handle("/", http.FileServer(http.Dir("./static")))
+
+	go scheduleWeeklyReload()
 
 	fmt.Println("Server running on http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
