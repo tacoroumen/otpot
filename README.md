@@ -1,7 +1,7 @@
 # OT Honey Pot using Docker
 
 ## Introduction
-> This project is still under development, but if you like it you can start it :)
+> This project is still under development, but if you like it you can star it :)
 
 This Docker project is a honey pot that contain OT (Operational Technology) services.
 
@@ -14,7 +14,7 @@ Here is a list of the services:
 | MQTT | ✅ | 
 | CoAp | ✅ | 
 | Modbus | ✅ | 
-| LogSystem | ⏳ | 
+| LogSystem | ✅  | 
 
 ## Instalation 
 > You need to have docker installed on your server/machine. You can follow the [official Docker documentation](https://docs.docker.com/engine/install/) to do it.
