@@ -112,13 +112,13 @@
                     countryLayer = L.layerGroup(Object.values(countries).map(country => {
                         if (country.latitude && country.longitude) {
                             const marker = L.circleMarker([country.latitude, country.longitude], {
-                                color: getColor(country.average_threat_level), // Color based on average threat level
+                                color: getColor(country.max_threat_level), // Color based on max threat level
                                 radius: 10,
                                 weight: 1,
                                 opacity: 1,
                                 fillOpacity: 0.7
                             });
-                            marker.bindPopup(`Country: ${country.country}<br>IPs: ${country.count}<br>Request Count: ${country.request_count}<br>Average Threat Level: ${country.average_threat_level}`);
+                            marker.bindPopup(`Country: ${country.country}<br>IPs: ${country.count}<br>Request Count: ${country.request_count}<br>Max Threat Level: ${country.max_threat_level}`);
                             return marker;
                         }
                     }).filter(marker => marker));

@@ -6,24 +6,13 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math"
 	"net"
 	"net/http"
-	"net/smtp"
 	"os"
 	"regexp"
 	"strings"
 	"time"
 )
-
-type Config struct {
-	SMTPServer           string `json:"smtpserver"`
-	SMTPPort             int    `json:"smtpport"`
-	Username             string `json:"username"`
-	Password             string `json:"password"`
-	Recipient            string `json:"recipient"`
-	ThreatLevelThreshold int    `json:"threatLevelThreshold"`
-}
 
 // APIResponse represents a single IP geolocation record
 type APIResponse struct {
@@ -37,12 +26,12 @@ type APIResponse struct {
 
 // CountryData aggregates data for a country
 type CountryData struct {
-	Country            string  `json:"country"`
-	Latitude           float64 `json:"latitude"`
-	Longitude          float64 `json:"longitude"`
-	Count              int     `json:"count"`                // Count of IPs from this country
-	RequestCount       int     `json:"request_count"`        // Total request count for the country
-	AverageThreatLevel float64 `json:"average_threat_level"` // Average threat level for the country
+	Country        	string  `json:"country"`
+	Latitude       	float64 `json:"latitude"`
+	Longitude      	float64 `json:"longitude"`
+	Count          	int     `json:"count"`            // Count of IPs from this country
+	RequestCount   	int     `json:"request_count"`    // Total request count for the country
+	MaxThreatLevel	int     `json:"max_threat_level"` // max threat level for the country
 }
 
 // Global in-memory cache
@@ -71,6 +60,7 @@ func loadConfig(configFile string) (*Config, error) {
 
 // fetchGeoData loads the geolocation data for a specific IP from the external API
 func fetchGeoData(apiURL string, ip string) (string, error) { // Return the country name as a string
+
 	resp, err := http.Get(apiURL)
 	if err != nil {
 		return "", fmt.Errorf("error fetching geo data: %w", err)
@@ -157,7 +147,7 @@ func parseLogs(logFiles []string) error {
 	return nil
 }
 
-// isExcluded checks if the IP is in the range 10.0.0.0/24
+// isExcluded checks if the IP is in the range 10.10.0.0/24
 func isExcluded(ip string) bool {
 	_, cidr, _ := net.ParseCIDR("10.10.0.0/24")
 	parsedIP := net.ParseIP(ip)
@@ -199,7 +189,6 @@ func calculateThreatLevel(ip string, country string, failedAttempts int) int {
 	return threatLevel
 }
 
-// Fixing getIPReputation to handle potential error return
 func getIPReputation(ip string) int {
 	// Your AbuseIPDB API key
 	data, err := os.ReadFile("key.txt")
@@ -295,11 +284,11 @@ func threatsHandler(w http.ResponseWriter, r *http.Request) {
 func reloadHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse log files to extract IPs
 	logFiles := []string{
-		"../logs/coap.log",
-		"../logs/mqtt.log",
-		"../logs/modbus.log",
-		"../logs/cowrie.log",
-		"test_ips.txt", // Add the test IPs file
+		"/logs/coap.log",
+		"/logs/mqtt.log",
+		"/logs/modbus.log",
+		"/logs/cowrie.log",
+		//"test_ips.txt", // Add the test IPs file
 	}
 	if err := parseLogs(logFiles); err != nil {
 		log.Fatalf("Error parsing log files: %v", err)
@@ -348,25 +337,25 @@ func pointsHandler(w http.ResponseWriter, r *http.Request) {
 // countriesHandler serves aggregated country-level data
 func countriesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	// Calculate average threat level for each country
+
+	// Calculate the maximum threat level for each country
 	for country, data := range countryData {
-		// Calculate total threat level for the country
-		totalThreatLevel := 0
+		// Initialize maxThreatLevel for the country
+		maxThreatLevel := 0
 		for _, ip := range ipData {
 			if ip.Country == country {
-				// Include the ThreatLevel in the calculation
-				totalThreatLevel += ip.ThreatLevel
+				// Update maxThreatLevel if the current IP's ThreatLevel is higher
+				if ip.ThreatLevel > maxThreatLevel {
+					maxThreatLevel = ip.ThreatLevel
+				}
 			}
 		}
-		// Calculate the average threat level
-		if data.Count > 0 {
-			data.AverageThreatLevel = float64(totalThreatLevel) / float64(data.Count)
-			data.AverageThreatLevel = math.Round(float64(totalThreatLevel)/float64(data.Count)*100) / 100
-		}
+		// Update the max threat level in the data
+		data.MaxThreatLevel = maxThreatLevel
 		countryData[country] = data
 	}
 
-	// Return the aggregated country-level data with the average threat level
+	// Return the aggregated country-level data with the max threat level
 	json.NewEncoder(w).Encode(countryData)
 }
 
