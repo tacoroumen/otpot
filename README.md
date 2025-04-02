@@ -19,9 +19,11 @@ Here is a list of the services:
 ## Instalation 
 > You need to have docker installed on your server/machine. You can follow the [official Docker documentation](https://docs.docker.com/engine/install/) to do it.
 
+**[Linux users]**\
 Before download the repository, please check your umask setting by typing `umask`. The result should be `0022`.\
 If it's not the case, you can change it temporarily for the current terminal session you're using by typing: `umask 0022`.\
 It will ensure that the files are cloned with the right permission.\
+\
 After that you can download the repository using `git clone https://github.com/gabriel-lepinay/otpot.git`
 
 ## How to use it 
