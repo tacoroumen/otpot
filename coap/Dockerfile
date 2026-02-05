@@ -1,5 +1,5 @@
 # Use the official Golang image as the base image
-FROM golang:latest
+FROM golang:1.26rc2
 WORKDIR /go/src/app
 COPY . .
 RUN go build -o coap-server .
